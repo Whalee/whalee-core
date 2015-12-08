@@ -13,6 +13,10 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func ForceDeploy(githubRepo string) {
+  //Force the dheployment inside the dockers
+}
+
 func GetInfos(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   i := string(vars["id"])

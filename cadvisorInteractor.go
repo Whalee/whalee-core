@@ -15,5 +15,7 @@ func getStatus(dockerId string) models.CAdvisorDocker {
   if(err!= nil) {
     log.Println(err);
   }
+  //TODO: change the format to a DockerInfos
+
   return res;
 }

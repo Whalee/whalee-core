@@ -4,6 +4,7 @@ package main
 import (
   "net/http"
   "github.com/gorilla/mux"
+  r "./routes"
 )
 
 
@@ -36,4 +37,6 @@ func NewRouter() *mux.Router {
 var routes = Routes {
   Route { "Index", "GET", "/", Index},
   Route { "infos", "GET", "/dockers/{id}/info", GetInfos},
+  Route { "newProject", "POST", "/projects/", r.PostProjects},
+  Route { "getProjects", "GET", "/projects/", r.GetProjects},
 };
