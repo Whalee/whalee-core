@@ -9,6 +9,8 @@ import(
   "io/ioutil"
   "log"
   "encoding/json"
+  "github.com/spf13/viper"
+
 )
 /*
  * POST /projects
@@ -31,8 +33,16 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
     }
   }
   log.Println("Creating a docker");
+  //Retrieve Docker config
+  var dockerCmd string
+  if viper.IsSet("dockerRemote") {
+    dockerCmd = "docker -d -H " + viper.GetString("dockerRemote.ip") + ":" + viper.GetString("dockerRemote.port") + " run " + viper.GetString("dockerName")
+  } else {
+    dockerCmd = "docker run -d " + viper.GetString("dockerName")
+  }
+
   //Exec a command
-  // exe_cmd("docker run ...")
+  exe_cmd(dockerCmd)
   log.Println("Retrieving github " + project.Github + " from docker");
   //Call inside the executed docker the set up server
 
