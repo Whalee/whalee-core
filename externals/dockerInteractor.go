@@ -45,12 +45,11 @@ func NewLocalInteractor(file string) (*DockerInteractor) {
  */
 func (dtor *DockerInteractor) RunContainer(config Config) {
   id, err := dtor.createDefaultContainer(config);
-   if err != nil {}
-  //   dtor.pullContainer();
-  //   dtor.createContainer();
-  // }
-  dtor.startContainer(id);
-  // dtor.attachLogs();
+   if err != nil {
+  } else {
+    dtor.startContainer(id);
+    // dtor.attachLogs();
+  }
 }
 
 /*
@@ -68,9 +67,9 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
 }
 
   var createContOpts = docker.CreateContainerOptions {
-    Name: config.User + "-" + config.Project
+    Name: config.User + "-" + config.Project,
     Config: &docker.Config {
-      Image: viper.GetString("dockerName"),
+      Image: viper.GetString("containerBase"),
       ExposedPorts: map[docker.Port]struct{} {
         "3000/tcp": {},
       },
@@ -90,17 +89,13 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
 }
 
 /*
- * Pull a container from Docker Hub
- */
-func (dtor *DockerInteractor) pullContainer() {
-
-}
-
-/*
  * Start a previously created container
  */
 func (dtor *DockerInteractor) startContainer(ctid string) {
   err := dtor.client.StartContainer(ctid, nil);
+  if err != nil {
+    fmt.Printf("Error while starting container\n\t%s", err);
+  }
   fmt.Println("Container started");
 }
 
@@ -108,5 +103,5 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
  * Attach the logs somewhere
  */
 func (dtor *DockerInteractor) attachLogs() {
-
+  // TODO
 }

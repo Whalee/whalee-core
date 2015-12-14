@@ -8,6 +8,8 @@ import(
   "log"
   "encoding/json"
   "../externals"
+  "github.com/spf13/viper"
+
 )
 /*
  * POST /projects
@@ -31,7 +33,12 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
   }
   log.Println("Creating a docker");
   //local docker
-  dockerClient := externals.NewLocalInteractor("unix:///var/run/docker.sock");
+  var dockerClient *externals.DockerInteractor
+  if viper.IsSet("dockerRemote") {
+    dockerClient = externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
+  } else {
+    dockerClient = externals.NewLocalInteractor("unix:///var/run/docker.sock");
+  }
   config := externals.Config {
     User: "magicmicky",
     Project: "project1",
