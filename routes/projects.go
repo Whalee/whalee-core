@@ -2,15 +2,12 @@ package routes
 import(
   "fmt"
   "net/http"
-  "strings"
-  "os/exec"
   "../models"
   "io"
   "io/ioutil"
   "log"
   "encoding/json"
-  "github.com/spf13/viper"
-
+  "../externals"
 )
 /*
  * POST /projects
@@ -33,16 +30,15 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
     }
   }
   log.Println("Creating a docker");
-  //Retrieve Docker config
-  var dockerCmd string
-  if viper.IsSet("dockerRemote") {
-    dockerCmd = "docker -d -H " + viper.GetString("dockerRemote.ip") + ":" + viper.GetString("dockerRemote.port") + " run " + viper.GetString("dockerName")
-  } else {
-    dockerCmd = "docker run -d " + viper.GetString("dockerName")
+  //local docker
+  dockerClient := externals.NewLocalInteractor("unix:///var/run/docker.sock");
+  config := externals.Config {
+    User: "magicmicky",
+    Project: "project1",
   }
+  dockerClient.RunContainer(config);
 
-  //Exec a command
-  exe_cmd(dockerCmd)
+
   log.Println("Retrieving github " + project.Github + " from docker");
   //Call inside the executed docker the set up server
 
@@ -54,19 +50,4 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
  */
 func GetProjects(w http.ResponseWriter, r * http.Request) {
   fmt.Fprintln(w, ":oops:")
-}
-
-
-func exe_cmd(cmd string) {
-  fmt.Println("command is ",cmd)
-  // splitting head => g++ parts => rest of the command
-  parts := strings.Fields(cmd)
-  head := parts[0]
-  parts = parts[1:len(parts)]
-
-  out, err := exec.Command(head,parts...).Output()
-  if err != nil {
-    fmt.Printf("%s", err)
-  }
-  fmt.Printf("%s", out)
 }
