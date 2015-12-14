@@ -30,7 +30,7 @@ func NewRemoteInteractor(ip string, port string) (*DockerInteractor) {
 }
 
 func NewLocalInteractor(file string) (*DockerInteractor) {
-  dcl, err := docker.NewClient(file);
+  dcl, err   := docker.NewClient(file);
   if err != nil {
     fmt.Printf("Docker client creation error:\n\t%s\n", err);
   }
@@ -48,6 +48,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) {
    if err != nil {
   } else {
     dtor.startContainer(id);
+    port,_ := dtor.retrieveExposedPort(id);
     // dtor.attachLogs();
   }
 }
@@ -58,7 +59,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) {
 func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, error) {
 
   portBindings :=  map[docker.Port][]docker.PortBinding{
-        "3000/tcp": {{HostIP: "0.0.0.0", HostPort: "8080"}}}
+        "3000/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}}}
   createContHostConfig := docker.HostConfig{
     Binds:           []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
     PortBindings:    portBindings,
@@ -97,6 +98,15 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
     fmt.Printf("Error while starting container\n\t%s", err);
   }
   fmt.Println("Container started");
+}
+
+func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, error) {
+  cont, err :=dtor.client.InspectContainer(ctid);
+  if err != nil {
+    fmt.Printf("Error while Inspecting container \n\t%s", err)
+    return "",err
+  }
+  return cont.NetworkSettings.Ports["3000/tcp"][0].HostPort, nil
 }
 
 /*
