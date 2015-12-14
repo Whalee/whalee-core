@@ -1,5 +1,6 @@
 package models
 
 type ProjectRequest struct {
-  Github string `json:"github"`
+  User string `json:"user"`
+  Project string `json:"project"`
 }

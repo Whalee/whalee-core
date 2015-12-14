@@ -31,25 +31,27 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
         panic(err)
     }
   }
-  log.Println("Creating a docker");
-  //local docker
-  var dockerClient *externals.DockerInteractor
-  if viper.IsSet("dockerRemote") {
-    dockerClient = externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
-  } else {
-    dockerClient = externals.NewLocalInteractor("unix:///var/run/docker.sock");
+  if project.User != "" && project.Project != "" {
+    log.Println("Creating a docker for "+  project.Project);
+    //local docker
+    var dockerClient *externals.DockerInteractor
+    if viper.IsSet("dockerRemote") {
+      dockerClient = externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
+    } else {
+      dockerClient = externals.NewLocalInteractor("unix:///var/run/docker.sock");
+    }
+    config := externals.Config {
+      User: project.User,
+      Project: project.Project,
+    }
+    dockerClient.RunContainer(config);
+
+
+    log.Println("Retrieving github " + project.User + "/" + project.Project + " from docker");
+    //Call inside the executed docker the set up server
+
+    fmt.Fprintln(w, "ok")
   }
-  config := externals.Config {
-    User: "magicmicky",
-    Project: "project1",
-  }
-  dockerClient.RunContainer(config);
-
-
-  log.Println("Retrieving github " + project.Github + " from docker");
-  //Call inside the executed docker the set up server
-
-  fmt.Fprintln(w, "ok")
 }
 
 /*

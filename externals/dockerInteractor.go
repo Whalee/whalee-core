@@ -48,7 +48,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) {
    if err != nil {
   } else {
     dtor.startContainer(id);
-    port,_ := dtor.retrieveExposedPort(id);
+    // port,_ := dtor.retrieveExposedPort(id);
     // dtor.attachLogs();
   }
 }
