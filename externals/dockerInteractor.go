@@ -43,13 +43,18 @@ func NewLocalInteractor(file string) (*DockerInteractor) {
 /*
  * Run a given container
  */
-func (dtor *DockerInteractor) RunContainer(config Config) {
+func (dtor *DockerInteractor) RunContainer(config Config) (string, string, error) {
   id, err := dtor.createDefaultContainer(config);
    if err != nil {
+     fmt.Printf("Error while creating default container\n\t%s", err)
+     return "","", err
   } else {
     dtor.startContainer(id);
-    // port,_ := dtor.retrieveExposedPort(id);
-    // dtor.attachLogs();
+    appPort, managerPort, err := dtor.retrieveExposedPort(id);
+    if err != nil {
+      fmt.Printf("Error while starting the container\n\t%s", err)
+    }
+    return appPort, managerPort, err
   }
 }
 
@@ -59,7 +64,8 @@ func (dtor *DockerInteractor) RunContainer(config Config) {
 func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, error) {
 
   portBindings :=  map[docker.Port][]docker.PortBinding{
-        "3000/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}}}
+        "3000/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
+        "8080/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}}}
   createContHostConfig := docker.HostConfig{
     Binds:           []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
     PortBindings:    portBindings,
@@ -73,6 +79,7 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
       Image: viper.GetString("containerBase"),
       ExposedPorts: map[docker.Port]struct{} {
         "3000/tcp": {},
+        "8080/tcp": {},
       },
       Env: [](string){"VIRTUAL_HOST=" + config.User + ".whalee.io/"+config.Project},
     },
@@ -100,13 +107,16 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
   fmt.Println("Container started");
 }
 
-func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, error) {
+func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, error) {
   cont, err :=dtor.client.InspectContainer(ctid);
   if err != nil {
     fmt.Printf("Error while Inspecting container \n\t%s", err)
-    return "",err
+    return "", "", err
   }
-  return cont.NetworkSettings.Ports["3000/tcp"][0].HostPort, nil
+  port1 := cont.NetworkSettings.Ports["3000/tcp"][0].HostPort
+  managerPort :=cont.NetworkSettings.Ports["8080/tcp"][0].HostPort
+  fmt.Printf("Two interesting ports: 3000 -> %s, 8080 -> %s\n",port1,managerPort)
+  return port1, managerPort, nil
 }
 
 /*
