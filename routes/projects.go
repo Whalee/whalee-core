@@ -43,31 +43,20 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
 
 func deployApp(managerPort string, user string, project string) {
   log.Println("Retrieving github " + project + "/" + user + " from docker");
-  url := "http://localhost:" + managerPort + "/?url='http://github.com/"+ user + "/" + project + "'&action=clone";
-  req, err := http.NewRequest("GET", url, nil)
-  client := &http.Client{}
-  resp, err := client.Do(req)
+  url := "http://localhost:" + managerPort + "/git?url=https://github.com/"+ user + "/" + project + ".git&action=clone";
+  log.Println(url);
+  resp, err := http.Get(url)
+  fmt.Println(resp);
+  // req, err := http.NewRequest("GET", url, nil)
+  // client := &http.Client{}
+  // resp, err := client.Do(req)
   if err != nil {
       panic(err)
   }
   defer resp.Body.Close()
-  fmt.Println("response Status:", resp.Status)
-  body, _ := ioutil.ReadAll(resp.Body)
-  fmt.Println("response Body:", string(body))
-  //
-  // s := napping.Session{}
-  // log.Printf("Url -> %s\n", url)
-  // ans :=""
-  // _, err := s.Get(url, nil, &ans, nil);
-  // if err != nil {
-  //   fmt.Printf("Error !!\n\t%s\n",err);
-  // }
-  // if resp.Status() == 200 {
-  //   log.Printf("Everything's alright mate\n")
-  //   return;
-  // } else {
-  //   log.Printf("Error while deploying user app\n\t%s",err);
-  // }
+  // fmt.Println("response Status:", resp.Status)
+  // body, _ := ioutil.ReadAll(resp.Body)
+  // fmt.Println("response Body:", string(body))
 }
 
 func startDocker(user string, project string) (string) {

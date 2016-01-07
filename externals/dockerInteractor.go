@@ -3,7 +3,7 @@ import (
   "fmt"
   "github.com/fsouza/go-dockerclient"
   "github.com/spf13/viper"
-
+  "time"
 )
 
 type DockerInteractor struct {
@@ -54,6 +54,9 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, error
     if err != nil {
       fmt.Printf("Error while starting the container\n\t%s", err)
     }
+    //Wait till container started
+    //TODO: check for a better way to do that.
+    time.Sleep(5 * time.Second)
     return appPort, managerPort, err
   }
 }
@@ -65,7 +68,7 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
 
   portBindings :=  map[docker.Port][]docker.PortBinding{
         "3000/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
-        "8080/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}}}
+        "8081/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}}}
   createContHostConfig := docker.HostConfig{
     Binds:           []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
     PortBindings:    portBindings,
@@ -79,7 +82,7 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
       Image: viper.GetString("containerBase"),
       ExposedPorts: map[docker.Port]struct{} {
         "3000/tcp": {},
-        "8080/tcp": {},
+        "8081/tcp": {},
       },
       Env: [](string){"VIRTUAL_HOST=" + config.User + ".whalee.io/"+config.Project},
     },
@@ -114,8 +117,8 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, 
     return "", "", err
   }
   port1 := cont.NetworkSettings.Ports["3000/tcp"][0].HostPort
-  managerPort :=cont.NetworkSettings.Ports["8080/tcp"][0].HostPort
-  fmt.Printf("Two interesting ports: 3000 -> %s, 8080 -> %s\n",port1,managerPort)
+  managerPort :=cont.NetworkSettings.Ports["8081/tcp"][0].HostPort
+  fmt.Printf("Two interesting ports: 3000 -> %s, 8081 -> %s\n",port1,managerPort)
   return port1, managerPort, nil
 }
 
