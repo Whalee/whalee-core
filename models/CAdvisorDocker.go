@@ -1,6 +1,13 @@
 package models
 import "time"
 
+type CAdvisorDockerList struct {
+	Name string `json:"name"`
+	Subcontainers []struct {
+		Name string `json:"name"`
+	} `json:"subcontainers"`
+}
+
 
 type CAdvisorDocker struct {
 	Name string `json:"name"`

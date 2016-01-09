@@ -11,9 +11,9 @@ import(
   "github.com/spf13/viper"
 )
 /*
- * POST /projects
+ * POST /project
  */
-func PostProjects(w http.ResponseWriter, r *http.Request) {
+func PostProject(w http.ResponseWriter, r *http.Request) {
   var project models.ProjectRequest
   //Extract github repo url
   body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -32,6 +32,8 @@ func PostProjects(w http.ResponseWriter, r *http.Request) {
   }
   if project.User != "" && project.Project != "" {
     log.Println("Creating a docker for "+  project.Project);
+    //TODO: WE NEED TO START MULTIPLE DOCKERS INSTEAD OF JUST ONE FOR THE application
+    //TODO
     port := startDocker(project.User, project.Project)
     deployApp(port, project.User, project.Project)
     //Call inside the executed docker the set up server
@@ -75,8 +77,8 @@ func startDocker(user string, project string) (string) {
 }
 
 /*
- * GET /projects
+ * GET /project/
  */
-func GetProjects(w http.ResponseWriter, r * http.Request) {
+func GetProject(w http.ResponseWriter, r * http.Request) {
   fmt.Fprintln(w, ":oops:")
 }
