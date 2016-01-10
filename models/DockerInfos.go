@@ -5,8 +5,8 @@ package models
 
 type Internals struct {
   Max int `json:"max"`
-  Cur int `json:"cur"`
-  Hist []int `json:"hist"`
+  Cur float64 `json:"cur"`
+  Hist []float64 `json:"hist"`
 }
 
 type DockerInfos struct {

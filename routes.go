@@ -34,5 +34,5 @@ var routes = Routes{
 	Route{"Index", "GET", "/", Index},
 	Route{"newProject", "POST", "/project/", r.PostProject},
 	Route{"getProject", "GET", "/project/{id}", r.GetProject},
-	// Route{"infos", "GET", "/container/{id}", r.GetInfos},
+	Route{"infos", "GET", "/container/{id}", r.GetInfos},
 }
