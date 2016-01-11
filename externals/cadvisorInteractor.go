@@ -38,10 +38,6 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 	prev_cpu := extractCpuFromStats(jq, url, len(stats)-2);
 	cur_mem := extractMemFromStats(jq, url, len(stats)-1);
 	limit_mem, err := jq.Float64(url, "spec", "memory", "limit");
-	i := uint64(18446744073709551615)
-	log.Println(err);
-	log.Println(limit_mem);
-	log.Println(i);
 	proc := models.Internals{
 		Max:100,
 		Cur: getCpuUsage(cur_cpu, prev_cpu),
