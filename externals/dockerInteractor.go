@@ -93,7 +93,7 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
   createContOpts := docker.CreateContainerOptions {
     Name: "DRCoN_"+service_name,
     Config: &docker.Config {
-      Image: "apox0/DRCoN",
+      Image: "apox0/drcon",
       ExposedPorts: map[docker.Port]struct{} {
         "80/tcp":{},
       },
@@ -177,7 +177,7 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
 
 func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, string, error) {
   cont, err :=dtor.client.InspectContainer(ctid);
-  if err != nil {
+  if err != nil {/v1/catalog/service/my_app
     fmt.Printf("Error while Inspecting container \n\t%s", err)
     return "", "", "", err
   }
