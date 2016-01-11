@@ -7,6 +7,7 @@ import(
   "io/ioutil"
   "log"
   "encoding/json"
+  "strings"
   "../externals"
   "github.com/gorilla/mux"
   "github.com/spf13/viper"
@@ -33,20 +34,24 @@ func PostProject(w http.ResponseWriter, r *http.Request) {
   }
   if project.User != "" && project.Project != "" {
     log.Println("Creating a docker for "+  project.Project);
-    //TODO: WE NEED TO START MULTIPLE DOCKERS INSTEAD OF JUST ONE FOR THE application
-    //TODO
-    port := startDocker(project.User, project.Project)
-    deployApp(port, project.User, project.Project)
+    port, ip := startDocker(project.User, project.Project)
+    deployApp(port, ip, project.User, project.Project)
     //Call inside the executed docker the set up server
-
-    fmt.Fprintln(w, "ok")
+    res := models.ProjectResponse {
+      Id: project.User + "@" + project.Project,
+    }
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(res); err != nil {
+        panic(err)
+    }
   }
 }
 
 
-func deployApp(managerPort string, user string, project string) {
+func deployApp(managerPort string, ip string, user string, project string) {
   log.Println("Retrieving github " + project + "/" + user + " from docker");
-  url := "http://localhost:" + managerPort + "/git?url=https://github.com/"+ user + "/" + project + ".git&action=clone";
+  url := "http://" + ip + ":" + managerPort + "/setup?url=https://github.com/"+ user + "/" + project + ".git&main=main.js";
   log.Println(url);
   resp, err := http.Get(url)
   fmt.Println(resp);
@@ -62,19 +67,23 @@ func deployApp(managerPort string, user string, project string) {
   // fmt.Println("response Body:", string(body))
 }
 
-func startDocker(user string, project string) (string) {
+func startDocker(user string, project string) (string, string) {
   var dockerClient *externals.DockerInteractor
   if viper.IsSet("dockerRemote") {
     dockerClient = externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
   } else {
     dockerClient = externals.NewLocalInteractor("unix:///var/run/docker.sock");
   }
-  config := externals.Config {
+  projConfig := externals.Config {
     User: user,
     Project: project,
+  };
+  if viper.IsSet("consul") {
+    dockerClient.StartDRCoN(projConfig, viper.GetString("consul.ip"), viper.GetString("consul.port"));
   }
-  _, managerPort, _ := dockerClient.RunContainer(config);
-  return managerPort
+
+  _, managerPort, ip, _:= dockerClient.RunContainer(projConfig);
+  return managerPort,ip
 }
 
 /*

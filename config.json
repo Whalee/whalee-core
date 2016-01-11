@@ -1,8 +1,12 @@
 {
-  "dockerrRemote" : {
+  "dockerRemote" : {
     "ip": "192.168.1.100",
     "port": "3375"
   },
-  "containerBase" : "whalee/whalee-node:v0.0.4",
+  "consul" : {
+    "ip": "192.168.1.100",
+    "port": "8500"
+  },
+  "containerBase" : "whalee/whalee-node:v0.0.6",
   "cadvisorUrl": ["http://localhost:8080/api/v1.3/"]
 }

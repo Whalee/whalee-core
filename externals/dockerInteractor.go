@@ -4,6 +4,10 @@ import (
   "github.com/fsouza/go-dockerclient"
   "github.com/spf13/viper"
   "time"
+  "strconv"
+  "gopkg.in/jmcvetta/napping.v3"
+  	"log"
+    "../jsonq"
 )
 
 type DockerInteractor struct {
@@ -43,21 +47,21 @@ func NewLocalInteractor(file string) (*DockerInteractor) {
 /*
  * Run a given container
  */
-func (dtor *DockerInteractor) RunContainer(config Config) (string, string, error) {
+func (dtor *DockerInteractor) RunContainer(config Config) (string, string, string, error) {
   id, err := dtor.createDefaultContainer(config);
    if err != nil {
      fmt.Printf("Error while creating default container\n\t%s", err)
-     return "","", err
+     return "","", "", err
   } else {
     dtor.startContainer(id);
-    appPort, managerPort, err := dtor.retrieveExposedPort(id);
+    appPort, managerPort, ip, err := dtor.retrieveExposedPort(id);
     if err != nil {
       fmt.Printf("Error while starting the container\n\t%s", err)
     }
     //Wait till container started
     //TODO: check for a better way to do that.
     time.Sleep(5 * time.Second)
-    return appPort, managerPort, err
+    return appPort, managerPort, ip, err
   }
 }
 
@@ -73,15 +77,60 @@ func (dtor *DockerInteractor) ListContainers(project, user string) {
   }
   fmt.Println(containers);
 }
+func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport string) {
+  contid, err := dtor.createDRCoNContainer(project, consulip, consulport);
+  if err != nil {
+    // fmt.Printf("Error while creating default container\n\t%s", err)
+    // return "","", err
+    return
+  } else {
+   dtor.startContainer(contid);
+  }
+}
 
+func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consulport string) (string, error) {
+  service_name :=  conf.User + "@"+conf.Project
+  createContOpts := docker.CreateContainerOptions {
+    Name: "DRCoN_"+service_name,
+    Config: &docker.Config {
+      Image: "apox0/DRCoN",
+      ExposedPorts: map[docker.Port]struct{} {
+        "80/tcp":{},
+      },
+      Env: []string {
+        "VIRTUAL_HOST="+conf.User+".whalee.io",
+        "constraint:function==master",
+        "CONSUL="+consulip+":"+consulport,
+        "SERVICE_NAME=DRCoN_" + service_name,
+        "SERVICE="+service_name,
+      },
+      Labels: map[string]string {
+        "project": conf.Project,
+        "user": conf.User,
+      },
+    },
+    HostConfig: &docker.HostConfig{
+      Binds: []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
+    },
+  }
+  cont, err := dtor.client.CreateContainer(createContOpts)
+  if err != nil {
+    fmt.Printf("CreateContainer failed for DRCoN\n\t%s\n",err)
+    return "",err
+  } else {
+    fmt.Printf("DRCoN Container created\n");
+    return cont.ID,nil
+  }
+}
 /*
  * Create a container from a given name
  */
 func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, error) {
 
   portBindings :=  map[docker.Port][]docker.PortBinding{
-        "3000/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
-        "8081/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}}}
+     "80/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
+    "8081/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
+  }
   createContHostConfig := docker.HostConfig{
     Binds:           []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
     PortBindings:    portBindings,
@@ -90,14 +139,17 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
 }
 
   var createContOpts = docker.CreateContainerOptions {
-    Name: config.User + "-" + config.Project,
     Config: &docker.Config {
       Image: viper.GetString("containerBase"),
       ExposedPorts: map[docker.Port]struct{} {
-        "3000/tcp": {},
+        "80/tcp":{},
         "8081/tcp": {},
       },
-      Env: [](string){"VIRTUAL_HOST=" + config.User + ".whalee.io/"+config.Project},
+      Env: [](string){
+        "SERVICE_NAME=" + config.User + "@"+config.Project,
+        "SERVICE_8081_IGNORE=1",
+        "SERVICE_8080_IGNORE=1",
+        "constraint:function==node"},
     },
     HostConfig: &createContHostConfig,
   }
@@ -123,16 +175,35 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
   fmt.Println("Container started");
 }
 
-func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, error) {
+func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, string, error) {
   cont, err :=dtor.client.InspectContainer(ctid);
   if err != nil {
     fmt.Printf("Error while Inspecting container \n\t%s", err)
-    return "", "", err
+    return "", "", "", err
   }
-  port1 := cont.NetworkSettings.Ports["3000/tcp"][0].HostPort
+  port1 := cont.NetworkSettings.Ports["80/tcp"][0].HostPort
   managerPort :=cont.NetworkSettings.Ports["8081/tcp"][0].HostPort
+  ip := "localhost"
+  if viper.IsSet("consul") {
+    route := viper.GetString("consul.ip") + ":"+  viper.GetString("consul.port")
+    res := map[string]interface{}{}
+    _,err := napping.Get(route, nil, &res, nil);
+    if err != nil {
+      log.Println("Error while napping " + route);
+      log.Println(err)
+    }
+    jq := jsonq.NewQuery(res);
+    array,_ := jq.Array();
+    for  i := 0; i < len(array) ; i++ {
+      port,_ := jq.String(strconv.Itoa(i), "ServicePort")
+      if(port == managerPort) {
+        ipjq,_:= jq.String(strconv.Itoa(i), "Address")
+        ip =ipjq
+      }
+    }
+  }
   fmt.Printf("Two interesting ports: 3000 -> %s, 8081 -> %s\n",port1,managerPort)
-  return port1, managerPort, nil
+  return port1, managerPort, ip, nil
 }
 
 
