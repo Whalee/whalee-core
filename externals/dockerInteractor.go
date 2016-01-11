@@ -177,7 +177,7 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
 
 func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, string, error) {
   cont, err :=dtor.client.InspectContainer(ctid);
-  if err != nil {/v1/catalog/service/my_app
+  if err != nil {
     fmt.Printf("Error while Inspecting container \n\t%s", err)
     return "", "", "", err
   }
