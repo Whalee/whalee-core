@@ -91,7 +91,7 @@ func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport st
 func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consulport string) (string, error) {
   service_name :=  conf.User + "@"+conf.Project
   createContOpts := docker.CreateContainerOptions {
-    Name: "DRCoN_"+service_name,
+    Name: "DRCoN_"+conf.User + "_"+conf.Project,
     Config: &docker.Config {
       Image: "apox0/drcon",
       ExposedPorts: map[docker.Port]struct{} {
