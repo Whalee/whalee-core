@@ -4,7 +4,6 @@ import (
   "github.com/fsouza/go-dockerclient"
   "github.com/spf13/viper"
   "time"
-  "strconv"
   "gopkg.in/jmcvetta/napping.v3"
   	"log"
     "../jsonq"
@@ -186,18 +185,17 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid, service_name string) (st
   ip := "localhost"
   if viper.IsSet("consul") {
     route := "http://" + viper.GetString("consul.ip") + ":"+  viper.GetString("consul.port") + "/v1/catalog/service/" + service_name
-    res := []map[string]interface{}{}
+    res := []interface{}{}
     _,err := napping.Get(route, nil, &res, nil);
     if err != nil {
       log.Println("Error while napping " + route);
       log.Println(err)
     }
-    jq := jsonq.NewQuery(res);
-    array,_ := jq.Array();
-    for  i := 0; i < len(array) ; i++ {
-      port,_ := jq.String(strconv.Itoa(i), "ServicePort")
+    for  i := 0; i < len(res) ; i++ {
+      jq := jsonq.NewQuery(res[i]);
+      port, _ := jq.String("ServicePort")
       if(port == managerPort) {
-        ipjq,_:= jq.String(strconv.Itoa(i), "Address")
+        ipjq, _ := jq.String("Address")
         ip =ipjq
       }
     }
