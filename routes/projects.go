@@ -80,5 +80,9 @@ func startDocker(user string, project string) (string) {
  * GET /project/
  */
 func GetProject(w http.ResponseWriter, r * http.Request) {
-  fmt.Fprintln(w, ":oops:")
+  var cad *externals.CAInteractor
+  urls := viper.GetStringSlice("cadvisorUrl")
+  cad = externals.NewCAInteractor(urls)
+  dockers := cad.RetrieveContainers()
+   fmt.Println(dockers);
 }

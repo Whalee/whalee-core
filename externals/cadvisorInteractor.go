@@ -4,7 +4,7 @@ import (
 	"../models"
 	"gopkg.in/jmcvetta/napping.v3"
 	"log"
-  "github.com/jmoiron/jsonq"
+  "../jsonq"
 	"time"
 	"strconv"
 )
@@ -34,12 +34,14 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 	jq := jsonq.NewQuery(res);
 	id, _ := jq.String(url, "aliases", "1");
 	stats, _ := jq.Array(url, "stats");
-
 	cur_cpu := extractCpuFromStats(jq, url, len(stats)-1);
 	prev_cpu := extractCpuFromStats(jq, url, len(stats)-2);
 	cur_mem := extractMemFromStats(jq, url, len(stats)-1);
-	limit_mem, _ := jq.Int64(url, "spec", "memory", "limit");
-
+	limit_mem, err := jq.Float64(url, "spec", "memory", "limit");
+	i := uint64(18446744073709551615)
+	log.Println(err);
+	log.Println(limit_mem);
+	log.Println(i);
 	proc := models.Internals{
 		Max:100,
 		Cur: getCpuUsage(cur_cpu, prev_cpu),
@@ -107,22 +109,23 @@ func getCpuUsage(cur models.TimestampedValue, prev models.TimestampedValue) floa
 	durationInNs := getIntervalInNs(cur.Date, prev.Date)
 	return (float64(cur.Value) - float64(prev.Value)) / float64(durationInNs)
 }
-func getMemUsage(cur int, max int) float64 {
-	return float64((float64(cur) / float64(max)) * 100)
+func getMemUsage(cur int64, max float64) float64 {
+	res := float64(float64(cur) / max) * 100
+	return res
 }
 
 func extractCpuFromStats(jq *jsonq.JsonQuery, url string, i int) models.TimestampedValue {
 	date, _ := jq.String(url, "stats", strconv.Itoa(i), "timestamp")
 	cpu, _ := jq.Int(url, "stats", strconv.Itoa(i), "cpu", "usage", "total");
 	return models.TimestampedValue{
-		Value: cpu,
+		Value: int64(cpu),
 		Date: date,
 	}
 }
 
 func extractMemFromStats(jq *jsonq.JsonQuery, url string, i int) models.TimestampedValue {
 	date, _ := jq.String(url, "stats", strconv.Itoa(i), "timestamp")
-	mem, _ := jq.Int(url, "stats", strconv.Itoa(i), "memory", "usage", );
+	mem, _ := jq.Int64(url, "stats", strconv.Itoa(i), "memory", "usage", );
 	return models.TimestampedValue{
 		Value: mem,
 		Date: date,

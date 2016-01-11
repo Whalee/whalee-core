@@ -1,7 +1,7 @@
 package models
 
 type TimestampedValue struct {
-  Value int
+  Value int64
   Date string
 }
 
