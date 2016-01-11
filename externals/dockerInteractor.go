@@ -61,6 +61,19 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, error
   }
 }
 
+func (dtor *DockerInteractor) ListContainers(project, user string) {
+  opts :=  docker.ListContainersOptions{
+    Filters: map[string][]string{
+      "label":{"project=" + project, "user=" + user,},
+    },
+  }
+  containers, err := dtor.client.ListContainers(opts)
+  if err != nil {
+    fmt.Printf("Error while listing containers\n\t%s", err)
+  }
+  fmt.Println(containers);
+}
+
 /*
  * Create a container from a given name
  */
@@ -121,6 +134,7 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, 
   fmt.Printf("Two interesting ports: 3000 -> %s, 8081 -> %s\n",port1,managerPort)
   return port1, managerPort, nil
 }
+
 
 /*
  * Attach the logs somewhere

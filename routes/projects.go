@@ -8,6 +8,7 @@ import(
   "log"
   "encoding/json"
   "../externals"
+  "github.com/gorilla/mux"
   "github.com/spf13/viper"
 )
 /*
@@ -80,9 +81,17 @@ func startDocker(user string, project string) (string) {
  * GET /project/
  */
 func GetProject(w http.ResponseWriter, r * http.Request) {
-  var cad *externals.CAInteractor
-  urls := viper.GetStringSlice("cadvisorUrl")
-  cad = externals.NewCAInteractor(urls)
-  dockers := cad.RetrieveContainers()
-   fmt.Println(dockers);
+  var dockerClient *externals.DockerInteractor
+  if viper.IsSet("dockerRemote") {
+    dockerClient = externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
+  } else {
+    dockerClient = externals.NewLocalInteractor("unix:///var/run/docker.sock");
+  }
+  vars := mux.Vars(r)
+  id := vars["id"]
+  userproj := strings.Split(id, "@");
+
+  dockerClient.ListContainers(userproj[0], userproj[1]);
+  //TODO send back the list of containers.
+  //  fmt.Println(dockers);
 }
