@@ -1,6 +1,6 @@
 package routes
 import(
-  "fmt"
+  "encoding/json"
   "net/http"
   // "github.com/gorilla/mux"
   "../externals"
@@ -16,5 +16,8 @@ func GetInfos(w http.ResponseWriter, r *http.Request) {
   cad = externals.NewCAInteractor(urls)
   dockers := cad.RetrieveContainers()
   res:= cad.GetStatus(dockers[0])
-  fmt.Println(res)
-}
+  w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+  w.WriteHeader(http.StatusOK)
+  if err := json.NewEncoder(w).Encode(res); err != nil {
+      panic(err)
+  }}

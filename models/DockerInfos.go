@@ -1,7 +1,9 @@
 package models
 
-
-
+type TimestampedValue struct {
+  Value int
+  Date string
+}
 
 type Internals struct {
   Max int `json:"max"`
