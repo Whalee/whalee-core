@@ -186,7 +186,7 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid, service_name string) (st
   ip := "localhost"
   if viper.IsSet("consul") {
     route := "http://" + viper.GetString("consul.ip") + ":"+  viper.GetString("consul.port") + "/v1/catalog/service/" + service_name
-    res := map[string]interface{}{}
+    res := []map[string]interface{}{}
     _,err := napping.Get(route, nil, &res, nil);
     if err != nil {
       log.Println("Error while napping " + route);
