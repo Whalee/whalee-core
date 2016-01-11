@@ -54,7 +54,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, strin
      return "","", "", err
   } else {
     dtor.startContainer(id);
-    appPort, managerPort, ip, err := dtor.retrieveExposedPort(id);
+    appPort, managerPort, ip, err := dtor.retrieveExposedPort(id, config.Project + "@" + config.User);
     if err != nil {
       fmt.Printf("Error while starting the container\n\t%s", err)
     }
@@ -175,7 +175,7 @@ func (dtor *DockerInteractor) startContainer(ctid string) {
   fmt.Println("Container started");
 }
 
-func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, string, error) {
+func (dtor *DockerInteractor) retrieveExposedPort(ctid, service_name string) (string, string, string, error) {
   cont, err :=dtor.client.InspectContainer(ctid);
   if err != nil {
     fmt.Printf("Error while Inspecting container \n\t%s", err)
@@ -185,7 +185,7 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid string) (string, string, 
   managerPort :=cont.NetworkSettings.Ports["8081/tcp"][0].HostPort
   ip := "localhost"
   if viper.IsSet("consul") {
-    route := "http://" + viper.GetString("consul.ip") + ":"+  viper.GetString("consul.port") + "/v1/catalog/service/my_app"
+    route := "http://" + viper.GetString("consul.ip") + ":"+  viper.GetString("consul.port") + "/v1/catalog/service/" + service_name
     res := map[string]interface{}{}
     _,err := napping.Get(route, nil, &res, nil);
     if err != nil {
