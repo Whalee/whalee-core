@@ -65,7 +65,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, strin
   }
 }
 
-func (dtor *DockerInteractor) ListContainers(user,project string) {
+func (dtor *DockerInteractor) ListContainers(user,project string) ([]string) {
   opts :=  docker.ListContainersOptions{
     Filters: map[string][]string{
       "label":{
@@ -84,7 +84,7 @@ func (dtor *DockerInteractor) ListContainers(user,project string) {
   for _, c := range containers {
     id = append(id, c.ID)
   }
-  fmt.Println(id);
+  return id;
 }
 func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport string) {
   contid, err := dtor.createDRCoNContainer(project, consulip, consulport);

@@ -102,12 +102,12 @@ func GetProject(w http.ResponseWriter, r * http.Request) {
   id := vars["id"]
   userproj := strings.Split(id, "@");
 
-  dockerClient.ListContainers(userproj[0], userproj[1]);
+  dockers := dockerClient.ListContainers(userproj[0], userproj[1]);
   //TODO send back the list of containers.
-  // w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-  // w.WriteHeader(http.StatusOK)
-  // if err := json.NewEncoder(w).Encode(dockers); err != nil {
-  //     panic(err)
-  // }
+  w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+  w.WriteHeader(http.StatusOK)
+  if err := json.NewEncoder(w).Encode(dockers); err != nil {
+      panic(err)
+  }
   //  fmt.Println(dockers);
 }
