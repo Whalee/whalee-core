@@ -80,12 +80,10 @@ func (dtor *DockerInteractor) ListContainers(project, user string) {
 func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport string) {
   contid, err := dtor.createDRCoNContainer(project, consulip, consulport);
   if err != nil {
-    // fmt.Printf("Error while creating default container\n\t%s", err)
-    // return "","", err
-    return
-  } else {
-   dtor.startContainer(contid);
+    fmt.Printf("Error while creating default container\n\t%s", err)
   }
+  fmt.Println("Starting DRCoN container")
+  dtor.startContainer(contid);
 }
 
 func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consulport string) (string, error) {
