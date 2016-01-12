@@ -224,6 +224,16 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid, service_name string) (st
   return port1, managerPort, ip, nil
 }
 
+func (dtor * DockerInteractor) RetrieveUserAndProject(ctid string) (string,string) {
+  cont, err :=dtor.client.InspectContainer(ctid);
+  if err != nil {
+    fmt.Printf("Error with inspection of container %s\n\t%s", ctid, err)
+  }
+  user := cont.Config.Labels["User"]
+  project := cont.Config.Labels["Project"]
+  return user,project
+}
+
 
 /*
  * Attach the logs somewhere

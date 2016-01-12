@@ -7,6 +7,9 @@ import (
   "../jsonq"
 	"time"
 	"strconv"
+	"net/http"
+	"github.com/spf13/viper"
+	"fmt"
 )
 
 type CAInteractor struct {
@@ -73,8 +76,42 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 func (adv *CAInteractor) Monitor() {
 	var containers = adv.RetrieveContainers();
 	for _, c := range containers {
-		adv.GetStatus(c)
+		stats := adv.GetStatus(c)
+		if(stats.Proc.Cur > 70) {
+			var dockerClient *DockerInteractor
+			if viper.IsSet("dockerRemote") {
+				dockerClient = NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
+			} else {
+				dockerClient = NewLocalInteractor("unix:///var/run/docker.sock");
+			}
+			user, project := dockerClient.RetrieveUserAndProject(c)
+			config := Config{
+				User: user,
+				Project: project,
+			}
+			_, managerPort, ip, _:= dockerClient.RunContainer(config);
+			deployApp(managerPort, ip, user, project);
+		}
 	}
+}
+
+
+func deployApp(managerPort string, ip string, user string, project string) {
+  log.Println("Retrieving github " + project + "/" + user + " from docker");
+  url := "http://" + ip + ":" + managerPort + "/setup?url=https://github.com/"+ user + "/" + project + ".git&main=main.js";
+  log.Println(url);
+  resp, err := http.Get(url)
+  fmt.Println(resp);
+  // req, err := http.NewRequest("GET", url, nil)
+  // client := &http.Client{}
+  // resp, err := client.Do(req)
+  if err != nil {
+      panic(err)
+  }
+  defer resp.Body.Close()
+  // fmt.Println("response Status:", resp.Status)
+  // body, _ := ioutil.ReadAll(resp.Body)
+  // fmt.Println("response Body:", string(body))
 }
 
 
