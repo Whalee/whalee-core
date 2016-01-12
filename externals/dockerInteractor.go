@@ -80,7 +80,11 @@ func (dtor *DockerInteractor) ListContainers(user,project string) {
   if err != nil {
     fmt.Printf("Error while listing containers\n\t%s", err)
   }
-  fmt.Println(containers);
+  var id []string
+  for _, c := range containers {
+    id = append(id, c.ID)
+  }
+  fmt.Println(id);
 }
 func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport string) {
   contid, err := dtor.createDRCoNContainer(project, consulip, consulport);
