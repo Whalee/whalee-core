@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"github.com/spf13/viper"
 	"fmt"
+	"strings"
 )
 
 type CAInteractor struct {
@@ -86,7 +87,8 @@ func (adv *CAInteractor) Monitor() {
 			} else {
 				dockerClient = NewLocalInteractor("unix:///var/run/docker.sock");
 			}
-			user, project := dockerClient.RetrieveUserAndProject(c)
+			ctid := strings.Split(c, "/");
+			user, project := dockerClient.RetrieveUserAndProject(ctid[len(ctid)-1])
 			config := Config{
 				User: user,
 				Project: project,
