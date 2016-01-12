@@ -68,9 +68,14 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, strin
 func (dtor *DockerInteractor) ListContainers(project, user string) {
   opts :=  docker.ListContainersOptions{
     Filters: map[string][]string{
-      "label":{"project=" + project, "user=" + user,},
+      "label":{
+        "project=" + project,
+        "user=" + user,
+      },
     },
   }
+  fmt.Println("project=" + project)
+  fmt.Println("user=" + user)
   containers, err := dtor.client.ListContainers(opts)
   if err != nil {
     fmt.Printf("Error while listing containers\n\t%s", err)
@@ -106,7 +111,6 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
       },
       Labels: map[string]string {
         "project": conf.Project,
-        "user": conf.User,
       },
     },
     HostConfig: &docker.HostConfig{
