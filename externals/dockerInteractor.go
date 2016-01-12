@@ -142,7 +142,6 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
     "8081/tcp": {{HostIP: "0.0.0.0", HostPort: ""}},
   }
   createContHostConfig := docker.HostConfig{
-    Binds:           []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
     PortBindings:    portBindings,
     PublishAllPorts: true,
     Privileged:      false,
