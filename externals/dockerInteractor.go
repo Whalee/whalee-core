@@ -228,8 +228,8 @@ func (dtor * DockerInteractor) RetrieveUserAndProject(ctid string) (string,strin
   if err != nil {
     fmt.Printf("Error with inspection of container %s\n\t%s", ctid, err)
   }
-  user := cont.Config.Labels["User"]
-  project := cont.Config.Labels["Project"]
+  user := cont.Config.Labels["user"]
+  project := cont.Config.Labels["project"]
   return user,project
 }
 
