@@ -99,7 +99,7 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
       },
       Env: []string {
         "VIRTUAL_HOST="+conf.User+".whalee.io",
-        // "constraint:function==master",
+        "constraint:function==master",
         "CONSUL="+consulip+":"+consulport,
         "SERVICE_NAME=DRCoN_" + service_name,
         "SERVICE="+service_name,
@@ -151,8 +151,7 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
         "SERVICE_NAME=" + config.User + "_"+config.Project,
         "SERVICE_8081_IGNORE=1",
         "SERVICE_8080_IGNORE=1",
-        // "constraint:function==node",
-      },
+        "constraint:function==node"},
     },
     HostConfig: &createContHostConfig,
   }
