@@ -111,6 +111,7 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
     },
     HostConfig: &docker.HostConfig{
       PortBindings : map[docker.Port][]docker.PortBinding{
+        "80/tcp": {{HostIP: "0.0.0.0", HostPort: ""}},
       },
     },
   }
@@ -129,8 +130,8 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
 func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, error) {
 
   portBindings :=  map[docker.Port][]docker.PortBinding{
-     "80/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
-    "8081/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
+     "80/tcp": {{HostIP: "0.0.0.0", HostPort: ""}},
+    "8081/tcp": {{HostIP: "0.0.0.0", HostPort: ""}},
   }
   createContHostConfig := docker.HostConfig{
     Binds:           []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
