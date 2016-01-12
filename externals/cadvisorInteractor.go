@@ -77,7 +77,7 @@ func (adv *CAInteractor) Monitor() {
 	var containers = adv.RetrieveContainers();
 	for _, c := range containers {
 		stats := adv.GetStatus(c)
-		fmt.Println(c + " --> " + stats.Proc.Cur)
+		fmt.Printf("%s --> %f", c, stats.Proc.Cur)
 		if(stats.Proc.Cur > 1.5) {
 			fmt.Println("Found a project with cpu > 70 " + c);
 			var dockerClient *DockerInteractor
