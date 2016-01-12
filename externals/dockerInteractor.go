@@ -110,7 +110,6 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
       },
     },
     HostConfig: &docker.HostConfig{
-      Binds: []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
       PortBindings : map[docker.Port][]docker.PortBinding{
         "80/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
       },
