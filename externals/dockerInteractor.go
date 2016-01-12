@@ -6,6 +6,7 @@ import (
   "time"
   "gopkg.in/jmcvetta/napping.v3"
   	"log"
+    "strconv"
     "../jsonq"
 )
 
@@ -193,8 +194,8 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid, service_name string) (st
     }
     for  i := 0; i < len(res) ; i++ {
       jq := jsonq.NewQuery(res[i]);
-      port, _ := jq.String("ServicePort")
-      if(port == port1) {
+      port, _ := jq.Int("ServicePort")
+      if(strconv.Itoi(port) == port1) {
         ipjq, _ := jq.String("Address")
         ip =ipjq
       }
