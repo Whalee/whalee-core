@@ -5,6 +5,7 @@ import(
   "github.com/gorilla/mux"
   "../externals"
   "github.com/spf13/viper"
+  "fmt"
 )
 
 
@@ -23,7 +24,10 @@ func GetInfos(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func monitor(w http.ResponseWriter, r *http.Request) {
+func Monitor(w http.ResponseWriter, r *http.Request) {
   var cad *externals.CAInteractor
+  urls := viper.GetStringSlice("cadvisorUrl")
+  cad = externals.NewCAInteractor(urls)
+  cad.Monitor();
   fmt.Fprintf(w, "ok");
 }
