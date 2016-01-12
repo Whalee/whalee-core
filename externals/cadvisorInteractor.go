@@ -55,7 +55,7 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 			}
 
 			var p_hist, m_hist []float64
-			for i:= maxInt(len(stats)-100,1); i<len(stats); i++ {
+			for i:= maxInt(len(stats)-20,1); i<len(stats); i++ {
 				p_cur := extractCpuFromStats(jq, url, i);
 				p_prev := extractCpuFromStats(jq, url, i-1);
 				p_hist = append(p_hist, getCpuUsage(p_cur, p_prev))
@@ -69,6 +69,7 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 			infos.Id=id
 			infos.Proc=proc
 			infos.Memory=mem
+			infos.Disk=mem
 		}
 	}
 	return infos
