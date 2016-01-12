@@ -54,7 +54,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, strin
      return "","", "", err
   } else {
     dtor.startContainer(id);
-    appPort, managerPort, ip, err := dtor.retrieveExposedPort(id, config.User + "@" + config.Project);
+    appPort, managerPort, ip, err := dtor.retrieveExposedPort(id, config.User + "_" + config.Project);
     if err != nil {
       fmt.Printf("Error while starting the container\n\t%s", err)
     }
