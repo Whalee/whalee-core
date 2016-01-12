@@ -89,7 +89,7 @@ func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport st
 }
 
 func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consulport string) (string, error) {
-  service_name :=  conf.User + "@"+conf.Project
+  service_name :=  conf.User + "_"+conf.Project
   createContOpts := docker.CreateContainerOptions {
     Name: "DRCoN_"+conf.User + "_"+conf.Project,
     Config: &docker.Config {
@@ -149,7 +149,7 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
         "8081/tcp": {},
       },
       Env: [](string){
-        "SERVICE_NAME=" + config.User + "@"+config.Project,
+        "SERVICE_NAME=" + config.User + "_"+config.Project,
         "SERVICE_8081_IGNORE=1",
         "SERVICE_8080_IGNORE=1",
         "constraint:function==node"},
