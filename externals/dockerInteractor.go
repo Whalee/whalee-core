@@ -65,7 +65,7 @@ func (dtor *DockerInteractor) RunContainer(config Config) (string, string, strin
   }
 }
 
-func (dtor *DockerInteractor) ListContainers(project, user string) {
+func (dtor *DockerInteractor) ListContainers(user,project string) {
   opts :=  docker.ListContainersOptions{
     Filters: map[string][]string{
       "label":{
