@@ -84,6 +84,8 @@ func (dtor *DockerInteractor) StartDRCoN(project Config, consulip, consulport st
   }
   fmt.Println("Starting DRCoN container")
   dtor.startContainer(contid);
+  //TODO: check for a better way to do that.
+  time.Sleep(5 * time.Second)
 }
 
 func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consulport string) (string, error) {
@@ -109,6 +111,9 @@ func (dtor *DockerInteractor) createDRCoNContainer(conf Config, consulip, consul
     },
     HostConfig: &docker.HostConfig{
       Binds: []string{"/var/run:/var/run", "/sys:/sys", "/var/lib/docker:/var/lib/docker"},
+      PortBindings : map[docker.Port][]docker.PortBinding{
+        "80/tcp": {{HostIP: "0.0.0.0", HostPort: "0"}},
+      },
     },
   }
   cont, err := dtor.client.CreateContainer(createContOpts)
