@@ -25,7 +25,7 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 	//TODO: remove the usage of base_url to use the slaves url in adv.
 	infos :=models.DockerInfos{}
 	for  _, slave := range adv.SlavesUrl {
-		route := slave + "" + url
+		route := slave + "docker/" + url
 		log.Println("Querying " + route)
 		res := map[string]interface{}{}
 		_, err := napping.Get(route, nil, &res, nil)
