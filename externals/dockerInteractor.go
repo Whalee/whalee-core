@@ -198,6 +198,7 @@ func (dtor *DockerInteractor) retrieveExposedPort(ctid, service_name string) (st
     for  i := 0; i < len(res) ; i++ {
       jq := jsonq.NewQuery(res[i]);
       port, _ := jq.Int("ServicePort")
+      log.Println(port + " - " + port1);
       if(strconv.Itoa(port) == port1) {
         ipjq, _ := jq.String("Address")
         ip =ipjq
