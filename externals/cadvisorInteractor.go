@@ -40,36 +40,38 @@ func (adv *CAInteractor) GetStatus(url string) models.DockerInfos {
 			jq := jsonq.NewQuery(res);
 			id, _ := jq.String(url, "aliases", "1");
 			stats, _ := jq.Array(url, "stats");
-			cur_cpu := extractCpuFromStats(jq, url, len(stats)-1);
-			prev_cpu := extractCpuFromStats(jq, url, len(stats)-2);
-			cur_mem := extractMemFromStats(jq, url, len(stats)-1);
-			limit_mem, _ := jq.Float64(url, "spec", "memory", "limit");
-			proc := models.Internals{
-				Max:100,
-				Cur: getCpuUsage(cur_cpu, prev_cpu),
-			}
+			if(len(stats) > 2) {
+				cur_cpu := extractCpuFromStats(jq, url, len(stats)-1);
+				prev_cpu := extractCpuFromStats(jq, url, len(stats)-2);
+				cur_mem := extractMemFromStats(jq, url, len(stats)-1);
+				limit_mem, _ := jq.Float64(url, "spec", "memory", "limit");
+				proc := models.Internals{
+					Max:100,
+					Cur: getCpuUsage(cur_cpu, prev_cpu),
+				}
 
-			mem := models.Internals{
-				Max: 100,
-				Cur: float64(cur_mem.Value),
-			}
+				mem := models.Internals{
+					Max: 100,
+					Cur: float64(cur_mem.Value),
+				}
 
-			var p_hist, m_hist []float64
-			for i:= maxInt(len(stats)-20,1); i<len(stats); i++ {
-				p_cur := extractCpuFromStats(jq, url, i);
-				p_prev := extractCpuFromStats(jq, url, i-1);
-				p_hist = append(p_hist, getCpuUsage(p_cur, p_prev))
-				m_cur := extractMemFromStats(jq,url,i)
-				m_hist = append(m_hist, getMemUsage(m_cur.Value, limit_mem));
-			}
-			proc.Hist = p_hist
-			mem.Hist = m_hist
+				var p_hist, m_hist []float64
+				for i:= maxInt(len(stats)-20,1); i<len(stats); i++ {
+					p_cur := extractCpuFromStats(jq, url, i);
+					p_prev := extractCpuFromStats(jq, url, i-1);
+					p_hist = append(p_hist, getCpuUsage(p_cur, p_prev))
+					m_cur := extractMemFromStats(jq,url,i)
+					m_hist = append(m_hist, getMemUsage(m_cur.Value, limit_mem));
+				}
+				proc.Hist = p_hist
+				mem.Hist = m_hist
 
-			//TODO hdd
-			infos.Id=id
-			infos.Proc=proc
-			infos.Memory=mem
-			infos.Disk=mem
+				//TODO hdd
+				infos.Id=id
+				infos.Proc=proc
+				infos.Memory=mem
+				infos.Disk=mem
+			}
 		}
 	}
 	return infos
