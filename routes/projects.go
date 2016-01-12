@@ -70,8 +70,10 @@ func deployApp(managerPort string, ip string, user string, project string) {
 func startDocker(user string, project string) (string, string) {
   var dockerClient *externals.DockerInteractor
   if viper.IsSet("dockerRemote") {
+    log.Println("Using docker remote @"+viper.GetString("dockerRemote.ip")+":"+ viper.GetString("dockerRemote.port"))
     dockerClient = externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
   } else {
+    log.Println("Using local docker"
     dockerClient = externals.NewLocalInteractor("unix:///var/run/docker.sock");
   }
   projConfig := externals.Config {
