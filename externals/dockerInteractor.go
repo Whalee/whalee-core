@@ -151,7 +151,12 @@ func (dtor *DockerInteractor) createDefaultContainer(config Config) (string, err
         "SERVICE_NAME=" + config.User + "_"+config.Project,
         "SERVICE_8081_IGNORE=1",
         "SERVICE_8080_IGNORE=1",
-        "constraint:function==node"},
+        "constraint:function==node",
+      },
+      Labels: map[string]string {
+        "project": config.Project,
+        "user": config.User,
+      },
     },
     HostConfig: &createContHostConfig,
   }
