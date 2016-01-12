@@ -21,3 +21,9 @@ func GetInfos(w http.ResponseWriter, r *http.Request) {
       panic(err)
   }
 }
+
+
+func monitor(w http.ResponseWriter, r *http.Request) {
+  var cad *externals.CAInteractor
+  fmt.Fprintf(w, "ok");
+}

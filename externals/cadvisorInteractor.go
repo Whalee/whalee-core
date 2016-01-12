@@ -78,6 +78,7 @@ func (adv *CAInteractor) Monitor() {
 	for _, c := range containers {
 		stats := adv.GetStatus(c)
 		if(stats.Proc.Cur > 70) {
+			fmt.Println("Found a project with cpu > 70 " + c);
 			var dockerClient *DockerInteractor
 			if viper.IsSet("dockerRemote") {
 				dockerClient = NewRemoteInteractor(viper.GetString("dockerRemote.ip"), viper.GetString("dockerRemote.port"));
