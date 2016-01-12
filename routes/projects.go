@@ -81,7 +81,9 @@ func startDocker(user string, project string) (string, string) {
     Project: project,
   };
   if viper.IsSet("consul") {
-    dockerClient.StartDRCoN(projConfig, viper.GetString("consul.ip"), viper.GetString("consul.port"));
+    dockerClient2 := externals.NewRemoteInteractor(viper.GetString("dockerRemote.ip"), "2275");
+
+    dockerClient2.StartDRCoN(projConfig, viper.GetString("consul.ip"), viper.GetString("consul.port"));
   }
 
   _, managerPort, ip, _:= dockerClient.RunContainer(projConfig);
